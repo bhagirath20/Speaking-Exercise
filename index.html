@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Speaking Exercise</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        margin: 20px;
+      }
+      canvas {
+        border: 1px solid black;
+        display: block;
+        margin: 20px auto;
+      }
+      .controls {
+        margin: 10px;
+      }
+      textarea {
+        width: 80%;
+        height: 100px;
+        font-size: 16px;
+      }
+      button {
+        padding: 10px 20px;
+        margin: 5px;
+        font-size: 16px;
+      }
+      input[type="range"] {
+        width: 200px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Speaking Exercise</h1>
+    <canvas id="canvas" width="800" height="300"></canvas>
+    <div class="controls">
+      <button id="start">Start</button>
+      <button id="stop" disabled>Stop</button>
+      <label
+        >Speed: <input type="range" id="speed" min="1" max="10" value="5"
+      /></label>
+    </div>
+    <textarea id="text" placeholder="Enter text here..." disabled></textarea>
+
+    <script>
+      const canvas = document.getElementById("canvas");
+      const ctx = canvas.getContext("2d");
+      const startBtn = document.getElementById("start");
+      const stopBtn = document.getElementById("stop");
+      const speedSlider = document.getElementById("speed");
+      const textArea = document.getElementById("text");
+
+      let text =
+        "A struggling artist, Maya, faced countless rejections. One day, she painted her emotions onto a canvas—raw, unfiltered passion. A passerby saw it, bought it for a fortune, and introduced her to the world. Maya learned: persistence turns failures into stepping stones. Never quit; success may be one step away!";
+      let index = 0;
+      let animationRunning = false;
+      let speed = 5;
+
+      //
+
+      function drawText() {
+        if (!animationRunning) return;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.font = `${Math.max(canvas.width * 0.03, 20)}px cursive`; // Dynamic font size
+        ctx.fillStyle = "black";
+
+        let words = text.split(" ");
+        let line = "";
+        let y = canvas.height * 0.15; // Start at 15% from top
+        let x = canvas.width * 0.05; // Start at 5% from left
+        let lineHeight = Math.max(canvas.height * 0.07, 25); // Adjust line height
+        let maxWidth = canvas.width * 0.9; // 90% of canvas width
+
+        let tempText = text.substring(0, index);
+        let tempWords = tempText.split(" ");
+
+        for (let i = 0; i < tempWords.length; i++) {
+          let testLine = line + tempWords[i] + " ";
+          let testWidth = ctx.measureText(testLine).width;
+
+          if (testWidth > maxWidth) {
+            ctx.fillText(line, x, y);
+            line = tempWords[i] + " ";
+            y += lineHeight;
+          } else {
+            line = testLine;
+          }
+        }
+        ctx.fillText(line, x, y);
+
+        if (index < text.length) {
+          index++;
+          setTimeout(drawText, 200 / speed);
+        } else {
+          stopAnimation();
+        }
+      }
+
+      function startAnimation() {
+        text = textArea.value;
+        index = 0;
+        animationRunning = true;
+        startBtn.disabled = true;
+        stopBtn.disabled = false;
+        textArea.disabled = true;
+        drawText();
+      }
+
+      function stopAnimation() {
+        animationRunning = false;
+        startBtn.disabled = false;
+        stopBtn.disabled = true;
+        textArea.disabled = false;
+      }
+
+      speedSlider.addEventListener("input", () => {
+        speed = speedSlider.value;
+      });
+
+      startBtn.addEventListener("click", startAnimation);
+      stopBtn.addEventListener("click", stopAnimation);
+
+      textArea.value = text;
+    </script>
+  </body>
+</html>
